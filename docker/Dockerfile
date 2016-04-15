@@ -1,30 +1,42 @@
-FROM smebberson/alpine-base:2.0.0
+# Use phusion/passenger-full as base image. To make your builds reproducible, make
+# sure you lock down to a specific version, not to `latest`!
+# See https://github.com/phusion/passenger-docker/blob/master/Changelog.md for
+# a list of version numbers.
+FROM phusion/passenger-ruby22:0.9.18
 
-RUN apk add --update bash make
-RUN apk add --update ruby=2.2.4-r0 \
-  ruby-irb=2.2.4-r0 \
-  ruby-rdoc=2.2.4-r0 \
-  ruby-dev=2.2.4-r0 \
-  ruby-io-console=2.2.4-r0
-RUN apk add --update nginx=1.8.1-r0 && \
-    chown -R nginx:www-data /var/lib/nginx
-RUN rm -rf /var/cache/apk/*
+# Set correct environment variables.
+ENV HOME /root
 
-RUN gem install bundler
+# Use baseimage-docker's init process.
+CMD ["/sbin/my_init"]
 
-# ADD my_setup /my_setup
-# RUN /my_setup/setup_ruby.sh
-# RUN /my_setup/setup_nginx.sh
+# Clean up APT when done.
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# add configuration
+# write our own nginx.conf
 ADD nginx/nginx.conf /etc/nginx/nginx.conf
 # add environment variables to nginx
-ADD nginx/env.conf /etc/nginx/env.conf
-# set default site
+ADD nginx/main.d/env.conf /etc/nginx/main.d/env.conf
+# remove the default site
+RUN rm /etc/nginx/sites-enabled/default
+# set my default site
 ADD nginx/sites-enabled/server.conf /etc/nginx/sites-enabled/server.conf
-# add ssl certificates for https
+# add our ssl certs
 ADD ssl /etc/ssl
 
-EXPOSE 80 443
+# forward request and error logs to docker log collector
+RUN ln -sf /dev/stdout /var/log/nginx/access.log
+RUN ln -sf /dev/stderr /var/log/nginx/error.log
+
+# enable nginx
+RUN rm -f /etc/service/nginx/down
+
+# startup scripts that can be passed to /sbin/my_init -- COMMAND ARGUMENTS...
+# exit 0 if you want to just run it and then shut it down
+ADD my_startup /etc/my_startup
+
+# for thin to use
+RUN mkdir -p /tmp/pids
+RUN mkdir -p /tmp/sockets
 
 WORKDIR /home/app/webapp
