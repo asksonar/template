@@ -1,0 +1,21 @@
+# Dockerfile is built using
+# docker build -t local/$APP:latest docker
+
+# Dockerfile.prod is built using
+# docker build -t localhost:5000/$APP:latest -f docker/Dockerfile.prod .
+
+# Instead of using volumes and "caching" vendor/bundle on the local machine
+# this file ADDs the volume contents and then bundle installs using the frozen config
+
+FROM local/web
+
+ADD Gemfile Gemfile
+ADD Gemfile.lock Gemfile.lock
+
+RUN bundle install --without development test --path vendor/bundle --binstubs vendor/bundle/bin --frozen true -j4 --frozen
+
+ADD . /home/app/webapp
+
+RUN bundle install --without development test --path vendor/bundle --binstubs vendor/bundle/bin --frozen true -j4 --frozen
+
+RUN SONAR_ENV=production RAILS_ENV=production vendor/bundle/bin/rake assets:precompile
