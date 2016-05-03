@@ -1,5 +1,5 @@
 (set-env!
- :source-paths    #{"src/cljs" "less"}
+ :source-paths    #{"src/cljs" "css" "semantic"}
  :resource-paths  #{"resources"}
  :dependencies '[;; boot dependencies
                  [adzerk/boot-cljs          "1.7.48-6"   :scope "test"]
@@ -9,6 +9,7 @@
                  [org.slf4j/slf4j-nop       "1.7.13"     :scope "test"]
                  [org.clojure/clojurescript "1.7.122"]
                  [deraen/boot-less "0.5.0" :scope "test"]
+                 [deraen/boot-sass "0.2.1" :scope "test"]
                  [crisptrutski/boot-cljs-test "0.2.0-SNAPSHOT" :scope "test"]
                  [binaryage/dirac "0.2.0"]
                  [binaryage/devtools "0.6.1"]
@@ -16,6 +17,7 @@
                  [reagent "0.5.0"]
                  [secretary "1.2.3"]
                  [cljsjs/semantic-ui "2.1.8-0"]
+                 [com.andrewmcveigh/cljs-time "0.4.0"]
                  ;; bower dependencies (https://github.com/Deraen/less4clj)
                  [org.webjars.bower/font-awesome "4.6.1"]])
 
@@ -25,7 +27,8 @@
  '[adzerk.boot-reload    :refer [reload]]
  '[pandeiro.boot-http    :refer [serve]]
  '[crisptrutski.boot-cljs-test :refer [test-cljs]]
- '[deraen.boot-less    :refer [less]])
+ '[deraen.boot-less    :refer [less]]
+ '[deraen.boot-sass    :refer [sass]])
 
 (defn start-dirac! []
   (require 'dirac.agent)
@@ -43,10 +46,10 @@
   (comp (speak)
         (cljs)
         (less)
-        (sift :move {#"less.css" "css/less.css"
-                     #"less.main.css.map" "css/less.main.css.map"
-                     #"semantic.css" "css/semantic.css"
-                     #"semantic.main.css.map" "css/semantic.main.css.map"})))
+        (sass)
+        (sift :move {#"semantic.css" "css/semantic.css"
+                     #"semantic.main.css.map" "css/semantic.main.css.map"
+                     #"main.css" "css/main.css"})))
 
 (deftask run []
   (comp (serve)
