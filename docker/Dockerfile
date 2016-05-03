@@ -10,6 +10,10 @@ ENV HOME /root
 # Use baseimage-docker's init process.
 CMD ["/sbin/my_init"]
 
+# Install packages
+RUN apt-get update
+RUN apt-get -y install openjdk-8-jdk
+
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -31,6 +35,12 @@ RUN ln -sf /dev/stderr /var/log/nginx/error.log
 # enable nginx
 RUN rm -f /etc/service/nginx/down
 
+# add boot
+ADD https://github.com/boot-clj/boot-bin/releases/download/latest/boot.sh /usr/local/bin/boot
+RUN chmod 755 /usr/local/bin/boot
+ADD https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein /usr/local/bin/lein
+RUN chmod 755 /usr/local/bin/lein
+
 # startup scripts that can be passed to /sbin/my_init -- COMMAND ARGUMENTS...
 # exit 0 if you want to just run it and then shut it down
 ADD my_startup /etc/my_startup
@@ -39,4 +49,4 @@ ADD my_startup /etc/my_startup
 RUN mkdir -p /tmp/pids
 RUN mkdir -p /tmp/sockets
 
-WORKDIR /home/app/webapp
+WORKDIR /home/app

@@ -3,7 +3,8 @@
 source $(dirname $0)/vars
 
 # start docker on the mac
-docker-machine start
+# docker-machine start
+dinghy up
 
 # start db
 docker run -d --name db \
@@ -30,8 +31,8 @@ docker rm -f $APP
 
 # start the new image
 docker run -d --name $APP \
-  -v ~/sonar/$APP:/home/app/webapp \
-  -p 80:80 -p 443:443 \
+  -v ~/sonar/$APP:/home/app \
+  -p 3000:3000 -p 43828:43828 -p 8231:8231 \
   --link db:db \
   --link redis:redis \
   -e "SONAR_ENV=development" \
