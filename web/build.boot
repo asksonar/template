@@ -2,24 +2,24 @@
  :source-paths    #{"src/cljs" "css" "semantic"}
  :resource-paths  #{"resources"}
  :dependencies '[;; boot dependencies
-                 [adzerk/boot-cljs          "1.7.48-6"   :scope "test"]
-                 [adzerk/boot-cljs-repl     "0.2.0"      :scope "test"]
-                 [adzerk/boot-reload        "0.4.1"      :scope "test"]
-                 [pandeiro/boot-http        "0.6.3"      :scope "test"]
-                 [org.slf4j/slf4j-nop       "1.7.13"     :scope "test"]
-                 [org.clojure/clojurescript "1.7.122"]
-                 [deraen/boot-less "0.5.0" :scope "test"]
+                 [adzerk/boot-cljs          "1.7.228-1"   :scope "test"]
+                 [adzerk/boot-cljs-repl     "0.3.0"      :scope "test"]
+                 [adzerk/boot-reload        "0.4.8"      :scope "test"]
+                 [pandeiro/boot-http        "0.7.3"      :scope "test"]
+                 [org.slf4j/slf4j-nop       "1.7.21"     :scope "test"]
+                 [org.clojure/clojurescript "1.9.14"]
+                 [deraen/boot-less "0.5.0" :scope "test"] ; (https://github.com/Deraen/less4clj)
                  [deraen/boot-sass "0.2.1" :scope "test"]
-                 [crisptrutski/boot-cljs-test "0.2.0-SNAPSHOT" :scope "test"]
-                 [binaryage/dirac "0.2.0"]
+                 [crisptrutski/boot-cljs-test "0.2.1" :scope "test"]
+                 [binaryage/dirac "0.5.0"]
                  [binaryage/devtools "0.6.1"]
                  ;; clojurescript dependencies
-                 [reagent "0.5.0"]
+                 [reagent "0.6.0-alpha2"]
                  [secretary "1.2.3"]
                  [cljsjs/semantic-ui "2.1.8-0"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
-                 ;; bower dependencies (https://github.com/Deraen/less4clj)
-                 [org.webjars.bower/font-awesome "4.6.1"]])
+                 ;; bower dependencies
+                 [org.webjars.bower/font-awesome "4.6.3"]])
 
 (require
  '[adzerk.boot-cljs      :refer [cljs]]
@@ -47,9 +47,8 @@
         (cljs)
         (less)
         (sass)
-        (sift :move {#"semantic.css" "css/semantic.css"
-                     #"semantic.main.css.map" "css/semantic.main.css.map"
-                     #"main.css" "css/main.css"})))
+        (sift :move {#"^(semantic\.css(?:\.map)?)$" "css/$1"
+                     #"^(main\.css(?:\.map)?)$" "css/$1"})))
 
 (deftask run []
   (comp (serve)
@@ -57,8 +56,8 @@
         ; (cljs-repl)
         (reload)
         (repl :server true
-            :middleware '[dirac.nrepl.middleware/dirac-repl]
-            :port 8230)
+              :middleware '[dirac.nrepl.middleware/dirac-repl]
+              :port 8230)
         (dirac)
         (build)))
 
@@ -67,9 +66,15 @@
                  less {:compression true})
   identity)
 
+(deftask prod []
+  (comp (production)
+        (build)
+        (target :dir #{"target"})))
+
 (deftask development []
   (task-options! cljs   {:optimizations :none :source-map true}
-                 reload {:on-jsload 'web.app/init :ws-host "template.docker" :port 43828}
+                 reload {:on-jsload 'web.app/init
+                         :port 43828}
                  less   {:source-map true})
   identity)
 

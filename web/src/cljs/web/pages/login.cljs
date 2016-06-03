@@ -2,7 +2,7 @@
   (:require [reagent.core :as r]))
 
 (defn login-page []
-  [:div.ui.middle.aligned.center.aligned.grid
+  [:div.ui.middle.aligned.center.aligned.grid.main
     [:div.column
       [:h2.ui.teal.image.header
         [:div.content "Login to your account"]]

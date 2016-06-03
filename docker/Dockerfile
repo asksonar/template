@@ -36,16 +36,14 @@ RUN ln -sf /dev/stderr /var/log/nginx/error.log
 RUN rm -f /etc/service/nginx/down
 
 # add boot
-ADD https://github.com/boot-clj/boot-bin/releases/download/latest/boot.sh /usr/local/bin/boot
-RUN chmod 755 /usr/local/bin/boot
-ADD https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein /usr/local/bin/lein
-RUN chmod 755 /usr/local/bin/lein
+ADD bin/boot /usr/local/bin/boot
+ADD bin/lein /usr/local/bin/lein
 
 # startup scripts that can be passed to /sbin/my_init -- COMMAND ARGUMENTS...
 # exit 0 if you want to just run it and then shut it down
 ADD my_startup /etc/my_startup
 
-# for thin to use
+# for webserver to use
 RUN mkdir -p /tmp/pids
 RUN mkdir -p /tmp/sockets
 

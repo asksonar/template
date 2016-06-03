@@ -2,4 +2,4 @@
   (:require [reagent.core :as r]))
 
 (defn home-page []
-  [:div "Welcome home!"])
+  [:h2.main "Welcome home!"])
